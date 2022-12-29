@@ -5,20 +5,21 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define NOR 0  /* Normal mode for issuing commands, deleting or changing lines */
+#define NOR 0  /* Normal mode for issuing commands, deleting or changing
+                  lines */
 #define INS 1  /* Insert mode for writing a line to a file */
-#define OUT 2  /* This mode is not really mode but a state to tell the 
+#define OUT 2  /* This mode is not really mode but a state to tell the
                   program to graciously terminate */
 
 
 int
-main(int argc,const char**argv)
+main(int argc,char**argv)
 {
   u_int32_t LINS, COLS;
   u_int32_t curr_line;
-  u_int32_t curr_col;
+  u_int32_t curr_col_max[128];
   u_int32_t curr_line_max;
-  int flag_no_file, flag_err, mode, fd_file;
+  int flag_no_file, flag_err, mode, fd_file, i;
   char*normal;char**buffer;
   ssize_t bytes_read;
 
@@ -26,22 +27,23 @@ main(int argc,const char**argv)
   /* Atributions */
   LINS = 128; COLS = 180;
   curr_line = 0; curr_line_max = 0;
-  curr_col = 0;
   normal = malloc(64*sizeof(char));
   buffer = (char**) malloc(LINS*sizeof(char *));
-  for (int i = 0; i <= LINS; i++)
-	buffer[i] = (char *) malloc(COLS*sizeof(char));
+  for (i = 0; i <= LINS; i++)
+    buffer[i] = (char *) malloc(COLS*sizeof(char));
   flag_err = 0;
-  flag_no_file = 0;
+  flag_no_file = 1;
+
   /* Error Checking and checking for existing file */
   if (argc == 2)
   {
-    fd_file = open(argv[1], O_RDWR | O_CREAT, 777);
+    fd_file = open(argv[1], O_CREAT|O_WRONLY, 777);
     if (fd_file < 0)
     {
-      write(2,"Error opening file\n", 19);
+      write(2,"?\n", 2);
       flag_no_file = 1;
     }
+    else flag_no_file = 0;
   }
   if (argc > 2) flag_err = 1; /* set so it is only ed and file name */
 
@@ -64,7 +66,7 @@ main(int argc,const char**argv)
               curr_line++; /* if > curr_max */
             else write(1,"?\n",2);
           }
-          else if (*normal == '-') 
+          else if (*normal == '-')
           {
             if (curr_line > 0)
               curr_line--; /* if < 0 */
@@ -75,6 +77,14 @@ main(int argc,const char**argv)
             if (buffer[curr_line][0] == '\0') write(1,"?\n",2);
             else write(1,buffer[curr_line],(int) COLS);
           }
+          else if (*normal == 'w')
+          {
+            if (flag_no_file) write(1,"?\n",2);
+            else for (i = 0;
+                      i < curr_line_max;
+                      write(fd_file, buffer[i], curr_col_max[i]),i++
+                     );
+          }
           else write(1, "?\n",2);
 
           *normal = '\0'; /* reset the normal buffer */
@@ -83,10 +93,10 @@ main(int argc,const char**argv)
       }
       if (mode == INS)
       {
-          bytes_read = read(0,buffer[curr_line],(int) COLS); 
-	  curr_col = bytes_read;
-	  curr_line_max++;
-	  mode = NOR;
+        bytes_read = read(0,buffer[curr_line],(int) COLS);
+        curr_col_max[curr_line] = bytes_read;
+        if (curr_line == curr_line_max) curr_line_max++;
+        mode = NOR;
       }
 
     }
