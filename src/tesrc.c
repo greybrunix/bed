@@ -38,7 +38,7 @@ main(int argc,char**argv)
   /* argc = 1 || argc = 2 */
   static u_int32_t LINS, COLS;
   auto u_int32_t curr_line;
-  auto u_int32_t curr_col_max[128];
+  auto u_int32_t *curr_col_max;
   auto u_int32_t curr_line_max;
   auto int flag_no_file, flag_err, mode, fd_file, i;
   auto char*normal, **buffer, *file_name_buff;
@@ -49,14 +49,16 @@ main(int argc,char**argv)
   /* Atributions */
   LINS = 128; COLS = 128;
   curr_line = 0; curr_line_max = 0;
-  normal = malloc(COLS*sizeof(char));
   bytes_written = 0;
+  normal = malloc(COLS*sizeof(char));
+  curr_col_max = (u_int32_t *) malloc(COLS* sizeof (u_int32_t));
   buffer = (char**) malloc(LINS*sizeof(char *));
   for (i = 0; (u_int32_t) i <= LINS; i++)
     buffer[i] = (char *) malloc(COLS*sizeof(char));
   throw_out = 0;
   flag_err = throw_out;
   flag_no_file = 1;
+  mode = NOR;
 
   /* Error Checking and checking for existing file */
   if (argc == 2)
@@ -73,10 +75,9 @@ main(int argc,char**argv)
                                  and file name */
 
   /* Code Logic */
-  mode = NOR;
-  if (flag_err == 0 && mode != OUT)
+  if (!flag_err && mode != OUT)
   {
-    while (mode == NOR)
+    while (mode == NOR && !flag_err)
     {
       throw_out = read(0, normal, COLS);
       switch(*normal)
@@ -138,8 +139,9 @@ main(int argc,char**argv)
     }
   }
   free(normal);
-  for (i=0; (u_int32_t) i<LINS;free(buffer[i++]));
+  for (i=0; (u_int32_t) i<=LINS;free(buffer[i++]));
   free(buffer);
+  free(curr_col_max);
   fflush(stdin);
   printf("%ld\n",bytes_written);
   return flag_err;
