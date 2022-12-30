@@ -73,75 +73,68 @@ main(int argc,char**argv)
                                  and file name */
 
   /* Code Logic */
-  if (flag_err == 0)
+  mode = NOR;
+  if (flag_err == 0 && mode != OUT)
   {
-    mode = NOR;
-    while (mode != OUT)
+    while (mode == NOR)
     {
-      if (mode == NOR)
+      throw_out = read(0, normal, COLS);
+      switch(*normal)
       {
-        while (mode == NOR)
-        {
-          throw_out = read(0, normal, COLS);
-          switch(*normal)
-          {
-            case 'q': mode = OUT; break;/* exit command */
-            case 'i': mode = INS; break;/* switch to insert mode */
-            case 'a': mode = INS;
-                      curr_line_max++;
-                      curr_line++;
-                      if (*(*buffer + curr_line-1) == '\0')
-                        *(*buffer + curr_line-1) = '\n';
-                      break;
-            case '+': if (curr_line < curr_line_max)
-                        curr_line++; /* if > curr_max */
-                      else throw_out = write(1,"?\n",2);
-                      break;
-            case '-': if (curr_line > 0)
-                        curr_line--; /* if < 0 */
-                      else throw_out = write(1,"?\n",2);
-                      break;
-            case 'p': if (buffer[curr_line][0] == '\0')
-                        throw_out = write(1,"?\n",2);
-                      else throw_out = write(1,
-                                             buffer[curr_line],
-                                             curr_col_max[curr_line]);
-                      break;
-            case 'w': if (flag_no_file) throw_out = write(1,"?\n",2);
-                      else for (i = 0; (u_int32_t) i <= curr_line_max; i++)
-                        bytes_written += write(fd_file,
-                                               *(buffer+i),
-                                               *(curr_col_max+i));
-                      /* the correct functioning of this code is dependant
-                         on the correct opening and reading of file to buffer */
-                      break;
-            case 'e': file_name_buff = (char *) malloc((COLS-2)*sizeof (char));
-                      format_file_name(file_name_buff,normal,(ssize_t) (COLS-2));
-                      fd_file = open(file_name_buff, O_CREAT|O_RDWR, 0666);
-                      if (fd_file < 0) throw_out = write(1,"?\n",2);
-                      else flag_no_file = 0;
-                      /* Requires passing the contents of the file
-                         to the buffer */
-                      free(file_name_buff);
-                      break;
-            default: throw_out = write(1, "?\n",2);
-          }
+        case 'q': mode = OUT; break;/* exit command */
+        case 'i': mode = INS; break;/* switch to insert mode */
+        case 'a': mode = INS;
+                  curr_line_max++;
+                  curr_line++;
+                  if (*(*buffer + curr_line-1) == '\0')
+                      *(*buffer + curr_line-1) = '\n';
+                  break;
+        case '+': if (curr_line < curr_line_max)
+                    curr_line++; /* if > curr_max */
+                  else throw_out = write(1,"?\n",2);
+                  break;
+        case '-': if (curr_line > 0)
+                    curr_line--; /* if < 0 */
+                  else throw_out = write(1,"?\n",2);
+                  break;
+        case 'p': if (buffer[curr_line][0] == '\0')
+                    throw_out = write(1,"?\n",2);
+                  else throw_out = write(1,
+                                         buffer[curr_line],
+                                         curr_col_max[curr_line]);
+                  break;
+        case 'w': if (flag_no_file) throw_out = write(1,"?\n",2);
+                  else for (i = 0; (u_int32_t) i <= curr_line_max; i++)
+                  bytes_written += write(fd_file,
+                                         *(buffer+i),
+                                         *(curr_col_max+i));
+                 /* the correct functioning of this code is dependant
+                    on the correct opening and reading of file to buffer */
+                  break;
+        case 'e': file_name_buff = (char *) malloc((COLS-2)*sizeof (char));
+                  format_file_name(file_name_buff,normal,(ssize_t) (COLS-2));
+                  fd_file = open(file_name_buff, O_CREAT|O_RDWR, 0666);
+                  if (fd_file < 0) throw_out = write(1,"?\n",2);
+                  else flag_no_file = 0;
+                  /* Requires passing the contents of the file
+                     to the buffer */
+                  free(file_name_buff);
+                  break;
+        default : throw_out = write(1, "?\n",2);
         *normal = '\0'; /* reset the normal buffer */
-        }
       }
-      if (mode == INS)
-      {
-        if (**(buffer + curr_line) != '\0')
-        for (i=0; (u_int32_t) i<curr_col_max[curr_line];i++)
-        *(*(buffer + curr_line) + i) = '\0';
-        bytes_read = read(0,buffer[curr_line],(int) COLS);
-        *(*(buffer + curr_line)+bytes_read) = '\0';
-        /*printf("%ld\n", bytes_read);
-        fflush(stdin);*/
-        curr_col_max[curr_line] = bytes_read;
-        mode = NOR;
-      }
-
+    }
+    if (mode == INS)
+    {
+      if (**(buffer + curr_line) != '\0')
+      for (i=0; (u_int32_t) i<curr_col_max[curr_line];i++)
+           *(*(buffer + curr_line) + i) = '\0';
+      bytes_read = read(0,buffer[curr_line],(int) COLS);
+      *(*(buffer + curr_line)+bytes_read) = '\0';
+      /*printf("%ld\n", bytes_read);
+      fflush(stdin);*/
+      curr_col_max[curr_line] = bytes_read;
+      mode = NOR;
     }
   }
   free(normal);
