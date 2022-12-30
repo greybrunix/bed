@@ -1,6 +1,6 @@
 # BED
 
-A line editor for personal use aptly named Bruno EDitor after myself.
+A line editor for personal use aptly named bed (Bruno EDitor, pronounced bee-eh-dee) after myself.
 
 As a line editor it takes inspiration from the official standard UNIX editor ed.
 
