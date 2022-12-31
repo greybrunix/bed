@@ -1,4 +1,5 @@
 *.out
 */bed
 docs/*.pdf
-docs/*.htm
+docs/*.html
+
