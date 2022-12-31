@@ -4,13 +4,14 @@ A line editor for personal use aptly named bed (Bruno EDitor, pronounced bee-eh-
 
 As a line editor it takes inspiration from the official standard UNIX editor ed.
 
-FEATURES:
-1. Allows to edit line
-2. print line
-3. edit the next line
-4. change line
-5. save changes to a file
-6. load a file
+FEATURES/MNEMONICS:
+1. **e**dit file
+2. **i**nsert line to buffer (overwrites current content of buffer)
+3. **a**ppend line to buffer
+4. **+**1 to line number (go to next line)
+5. **-**1 to line number (go to previous line)
+6. **w**rite contents of buffer to a file
+7. **q**uit and exit the editor
 
 MISSING
 1. when loading a file, load also it's contents to the buffer
