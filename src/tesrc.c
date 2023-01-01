@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include "sregex.h"
 
 #define NOR 0  /* Normal mode for issuing commands, deleting or changing
                   lines */
