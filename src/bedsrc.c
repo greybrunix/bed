@@ -12,8 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include "sregex.h"
-
+#include "kregex.h"
 #define NOR 0  /* Normal mode for issuing commands, deleting or changing
                   lines */
 #define INS 1  /* Insert mode for writing a line to a file */
