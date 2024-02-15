@@ -32,12 +32,12 @@ match_here(char*regexp,
 {
   if (regexp[0] == '\0')
     return 1;
-  if (regexp[1]=='\\'&&regexp[2] == '|'&&regexp[3]!='\0')
-     return match_choice(regexp[0],regexp[3],regexp+4,text);
   if (regexp[1]=='\\'&&regexp[2] == '*')
     return match_kleene(regexp[0], regexp+3,text);
   if (regexp[1]=='\\'&&regexp[2] == '+') 
     return match_transitive(regexp[0], regexp+3,text);
+  if (regexp[1]=='\\'&&regexp[2] == '|'&&regexp[3]!='\0')
+     return match_choice(regexp[0],regexp[3],regexp+4,text);
   if (regexp[0] == '\\'&&regexp[1] == '$' && regexp[2] == '\0')
     return *text == '\0';
   if (*text!='\0' && (regexp[0]=='.' || regexp[0]==*text))
@@ -100,8 +100,8 @@ int
 main(void)
 {
 int res;
-char reg[20] = "\\^regexde\\*znu\\+ts\\$";
-char text[100] = "regexdeeeeeeznuuuuuuuuuuuts";
+char reg[20] = "a\\|b*";
+char text[100] = "";
 res = match_(reg, text);
 printf("%d\n",res);
 return 0;
